@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 SUPPORTED = {".csv", ".tsv", ".json", ".parquet"}
 
@@ -35,6 +38,11 @@ def load_data(path: str | Path, timestamp_column: str | None = None) -> pd.DataF
             raise KeyError(f"timestamp column {timestamp_column!r} not in data")
         df[timestamp_column] = pd.to_datetime(df[timestamp_column])
         df = df.sort_values(timestamp_column).reset_index(drop=True)
+
+    logger.info("loaded %s: %d rows x %d columns", path, len(df), df.shape[1])
+    n_missing = int(df.isna().sum().sum())
+    if n_missing:
+        logger.warning("%s contains %d missing values", path, n_missing)
     return df
 
 
@@ -48,10 +56,12 @@ def select_columns(df: pd.DataFrame, columns: list[str] | None) -> pd.DataFrame:
         non_numeric = [c for c in columns if not pd.api.types.is_numeric_dtype(subset[c])]
         if non_numeric:
             raise ValueError(f"columns are not numeric: {non_numeric}")
+        logger.debug("using columns: %s", columns)
         return subset
     numeric = df.select_dtypes(include="number")
     if numeric.empty:
         raise ValueError("no numeric columns found in data")
+    logger.debug("no columns configured; using all numeric columns: %s", list(numeric.columns))
     return numeric
 
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -11,6 +12,8 @@ import yaml
 
 from anomaly_detector.detectors import DETECTORS
 from anomaly_detector.ensemble import STRATEGIES
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -77,4 +80,11 @@ def load_config(path: str | Path) -> Config:
         raise FileNotFoundError(f"config file not found: {path}")
     text = path.read_text(encoding="utf-8")
     raw = json.loads(text) if path.suffix == ".json" else yaml.safe_load(text)
-    return config_from_dict(raw or {})
+    cfg = config_from_dict(raw or {})
+    logger.info(
+        "loaded config %s: detectors=%s strategy=%s",
+        path,
+        [d.name for d in cfg.detectors],
+        cfg.strategy,
+    )
+    return cfg

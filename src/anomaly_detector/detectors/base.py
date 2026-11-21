@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import logging
 from abc import ABC, abstractmethod
 
 import numpy as np
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 class BaseDetector(ABC):
@@ -54,7 +57,17 @@ class BaseDetector(ABC):
 
     def predict(self, data) -> np.ndarray:
         """Return a boolean mask, True where a row is anomalous."""
-        return self.score(data) > self.threshold
+        scores = self.score(data)
+        flags = scores > self.threshold
+        logger.debug(
+            "%s flagged %d/%d rows (threshold=%s, max score=%.3f)",
+            self.name,
+            int(flags.sum()),
+            len(flags),
+            self.threshold,
+            float(scores.max()) if len(scores) else 0.0,
+        )
+        return flags
 
     def fit_predict(self, data) -> np.ndarray:
         return self.fit(data).predict(data)

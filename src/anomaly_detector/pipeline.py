@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+import time
 from dataclasses import dataclass
 
 import numpy as np
@@ -11,6 +13,8 @@ from anomaly_detector.config import Config
 from anomaly_detector.data import select_columns
 from anomaly_detector.detectors import get_detector
 from anomaly_detector.ensemble import EnsembleDetector
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -38,15 +42,19 @@ class DetectionResult:
 
 def run_pipeline(df: pd.DataFrame, config: Config) -> DetectionResult:
     """Fit every configured detector on ``df`` and combine their votes."""
+    start = time.perf_counter()
     df = df.copy()
     if config.dropna:
+        before = len(df)
         df = df.dropna().reset_index(drop=True)
+        logger.info("dropna removed %d rows with missing values", before - len(df))
 
     features = select_columns(df, config.columns)
     detectors = [get_detector(spec.name, **spec.params) for spec in config.detectors]
     ensemble = EnsembleDetector(detectors, strategy=config.strategy).fit(features)
 
     names = []
+    flags = []
     for det in detectors:
         name = det.name
         # Disambiguate when the same detector is listed twice.
@@ -55,12 +63,25 @@ def run_pipeline(df: pd.DataFrame, config: Config) -> DetectionResult:
             name = f"{det.name}_{suffix}"
             suffix += 1
         names.append(name)
-        df[f"{name}_score"] = np.round(det.score(features), 6)
-        df[f"{name}_flag"] = det.predict(features)
+        # Score once per detector and reuse it for both the score and the flag column.
+        scores = det.score(features)
+        flag = scores > det.threshold
+        logger.debug("%s flagged %d/%d rows", name, int(flag.sum()), len(flag))
+        df[f"{name}_score"] = np.round(scores, 6)
+        df[f"{name}_flag"] = flag
+        flags.append(flag)
 
-    df["votes"] = ensemble.votes(features).sum(axis=1)
-    df["is_anomaly_pred"] = ensemble.predict(features)
-    return DetectionResult(data=df, detector_names=names)
+    votes = np.column_stack(flags)
+    df["votes"] = votes.sum(axis=1)
+    df["is_anomaly_pred"] = ensemble.combine(votes)
+    result = DetectionResult(data=df, detector_names=names)
+    logger.info(
+        "pipeline finished in %.2fs: %d anomalies in %d rows",
+        time.perf_counter() - start,
+        result.n_anomalies,
+        len(df),
+    )
+    return result
 
 
 def evaluate(y_true, y_pred) -> dict:

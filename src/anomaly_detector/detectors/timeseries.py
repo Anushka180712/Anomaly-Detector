@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import logging
+
 import numpy as np
 
 from anomaly_detector.detectors.base import BaseDetector
+
+logger = logging.getLogger(__name__)
 
 _EPS = 1e-12
 
@@ -28,7 +32,16 @@ class RollingZScoreDetector(BaseDetector):
 
     def fit(self, data) -> RollingZScoreDetector:
         # Stateless: statistics are computed on the data being scored.
-        self._to_frame(data)
+        frame = self._to_frame(data)
+        if len(frame) <= self.min_periods:
+            logger.warning(
+                "rolling_zscore: only %d rows but min_periods=%d; no row can be scored",
+                len(frame),
+                self.min_periods,
+            )
+        logger.debug(
+            "rolling_zscore ready: window=%d min_periods=%d", self.window, self.min_periods
+        )
         self._fitted = True
         return self
 

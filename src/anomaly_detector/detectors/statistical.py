@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import logging
+
 import numpy as np
 
 from anomaly_detector.detectors.base import BaseDetector
+
+logger = logging.getLogger(__name__)
 
 _EPS = 1e-12
 
@@ -31,6 +35,9 @@ class ZScoreDetector(BaseDetector):
         frame = self._to_frame(data)
         self.mean_ = np.nanmean(frame.to_numpy(), axis=0)
         self.std_ = np.nanstd(frame.to_numpy(), axis=0)
+        if np.any(self.std_ == 0):
+            logger.warning("zscore: some columns have zero variance and will never be flagged")
+        logger.debug("zscore fitted on %d rows: mean=%s std=%s", len(frame), self.mean_, self.std_)
         self._fitted = True
         return self
 
@@ -59,6 +66,7 @@ class IQRDetector(BaseDetector):
         values = self._to_frame(data).to_numpy()
         self.q1_ = np.nanpercentile(values, 25, axis=0)
         self.q3_ = np.nanpercentile(values, 75, axis=0)
+        logger.debug("iqr fitted on %d rows: q1=%s q3=%s", len(values), self.q1_, self.q3_)
         self._fitted = True
         return self
 
@@ -89,6 +97,11 @@ class MADDetector(BaseDetector):
         values = self._to_frame(data).to_numpy()
         self.median_ = np.nanmedian(values, axis=0)
         self.mad_ = np.nanmedian(np.abs(values - self.median_), axis=0)
+        if np.any(self.mad_ == 0):
+            logger.warning("mad: MAD is zero for some columns; most values are identical")
+        logger.debug(
+            "mad fitted on %d rows: median=%s mad=%s", len(values), self.median_, self.mad_
+        )
         self._fitted = True
         return self
 

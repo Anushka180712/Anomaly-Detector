@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import logging
+
 import numpy as np
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 
 from anomaly_detector.detectors.base import BaseDetector
+
+logger = logging.getLogger(__name__)
 
 
 class IsolationForestDetector(BaseDetector):
@@ -41,6 +45,9 @@ class IsolationForestDetector(BaseDetector):
         values = self._to_frame(data).to_numpy()
         mask = np.isnan(values)
         if mask.any():
+            logger.debug(
+                "isolation_forest: filling %d missing values with medians", int(mask.sum())
+            )
             values = np.where(mask, self._fill, values)
         return values
 
@@ -54,6 +61,13 @@ class IsolationForestDetector(BaseDetector):
             contamination=self.contamination,
             random_state=self.random_state,
         ).fit(scaled)
+        logger.debug(
+            "isolation_forest fitted on %d rows x %d features (trees=%d, contamination=%s)",
+            scaled.shape[0],
+            scaled.shape[1],
+            self.n_estimators,
+            self.contamination,
+        )
         self._fitted = True
         return self
 
