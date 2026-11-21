@@ -1,0 +1,30 @@
+# Default configuration for the sample sensor dataset.
+# Run: anomaly-detector detect data/sample_sensor.csv -c configs/default.yaml
+
+timestamp_column: timestamp
+
+# Numeric columns to analyse. Remove this key to use every numeric column.
+columns:
+  - temperature
+  - pressure
+  - humidity
+
+# How detector votes are combined: any | all | majority
+strategy: majority
+
+# Drop rows with missing values before detection.
+dropna: false
+
+detectors:
+  - name: zscore
+    threshold: 3.0
+  - name: iqr
+    threshold: 1.5
+  - name: mad
+    threshold: 3.5
+  - name: rolling_zscore
+    threshold: 3.5
+    window: 48
+  - name: isolation_forest
+    contamination: 0.02
+    random_state: 42

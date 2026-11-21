@@ -1,0 +1,11 @@
+# High-precision preset: every detector must agree before a row is flagged.
+timestamp_column: timestamp
+columns: [temperature, pressure, humidity]
+strategy: all
+detectors:
+  - name: zscore
+    threshold: 3.0
+  - name: mad
+    threshold: 3.5
+  - name: isolation_forest
+    contamination: 0.05
