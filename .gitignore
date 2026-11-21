@@ -1,0 +1,67 @@
+# --- Python bytecode / caches ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# --- Packaging / build ---
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+wheels/
+pip-wheel-metadata/
+MANIFEST
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# --- Testing / coverage ---
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+
+# --- Linters / type checkers ---
+.ruff_cache/
+.mypy_cache/
+.pyre/
+.dmypy.json
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- Editors / IDEs ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Secrets / local config ---
+.env
+.env.*
+!.env.example
+
+# --- Project outputs ---
+# Detection results and ad-hoc datasets; the bundled sample data stays tracked.
+output/
+outputs/
+results/
+*.log
+data/*
+!data/sample_sensor.csv
