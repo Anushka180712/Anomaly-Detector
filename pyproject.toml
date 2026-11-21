@@ -7,7 +7,7 @@ name = "anomaly-detector"
 version = "0.1.0"
 description = "Configurable anomaly detection toolkit for tabular and time-series data"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "Udisha Singh" }]
 dependencies = [
@@ -32,7 +32,7 @@ addopts = "-ra"
 
 [tool.ruff]
 line-length = 100
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]

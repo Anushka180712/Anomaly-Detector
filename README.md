@@ -1,7 +1,7 @@
 # Anomaly Detector
 
 [![CI](https://github.com/Anushka180712/Anomaly-Detector/actions/workflows/ci.yml/badge.svg)](https://github.com/Anushka180712/Anomaly-Detector/actions/workflows/ci.yml)
-![Python](https://img.shields.io/badge/python-3.9%2B-blue)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 A small, configurable toolkit for finding anomalies (outliers) in tabular and
@@ -24,7 +24,7 @@ and can be used from the command line or as a Python library.
 - **Evaluation**: pass a ground-truth column to get precision, recall and F1
 - **Synthetic data generator** for experiments
 - Multi-column data, missing values and constant columns are handled safely
-- Tests, linting and GitHub Actions CI across Python 3.9–3.12
+- Tests, linting and GitHub Actions CI across Python 3.10–3.13
 
 ## Project structure
 
@@ -54,7 +54,7 @@ Anomaly-Detector/
 
 ## Setup
 
-Requirements: Python 3.9 or newer and `git`.
+Requirements: Python 3.10 or newer and `git`.
 
 ```bash
 git clone https://github.com/Anushka180712/Anomaly-Detector.git
@@ -235,7 +235,7 @@ What the tests cover:
 
 `.github/workflows/ci.yml` runs on every push to `main` and on pull requests:
 `ruff` lint and format checks, then the test suite with coverage on Python
-3.9, 3.10, 3.11 and 3.12, followed by a CLI smoke test on the sample data.
+3.10, 3.11, 3.12 and 3.13, followed by a CLI smoke test on the sample data.
 
 ## Regenerating the sample data
 
